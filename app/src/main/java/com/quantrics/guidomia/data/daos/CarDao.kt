@@ -13,7 +13,7 @@ interface CarDao {
     @Query(
         """
             SELECT *
-            FROM cars LIMIT 1
+            FROM cars
         """
     )
     fun get(): List<Car>
@@ -22,5 +22,5 @@ interface CarDao {
     fun getCars(): LiveData<List<Car>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAllCars(users: List<Car>)
+    fun insertAllCars(cars: List<Car>)
 }

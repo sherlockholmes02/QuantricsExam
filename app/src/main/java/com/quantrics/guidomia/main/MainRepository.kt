@@ -12,10 +12,6 @@ import kotlinx.coroutines.withContext
  */
 class MainRepository(private val guidomiaDatabase: GuidomiaDatabase) {
 
-    fun isCarsEmpty(): Boolean {
-        return guidomiaDatabase.carDao().get().isEmpty()
-    }
-
     suspend fun getCars(): LiveData<List<Car>> {
         return withContext(Dispatchers.IO) {
             guidomiaDatabase.carDao().getCars()
