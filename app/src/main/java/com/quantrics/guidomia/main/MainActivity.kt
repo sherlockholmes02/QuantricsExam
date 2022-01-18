@@ -1,17 +1,20 @@
-package com.quantrics.guidomia
+package com.quantrics.guidomia.main
 
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import com.quantrics.guidomia.R
 import com.quantrics.guidomia.adapters.CarsAdapter
+import com.quantrics.guidomia.data.GuidomiaDatabase
+import com.quantrics.guidomia.data.entities.Car
 import com.quantrics.guidomia.databinding.ActivityMainBinding
-import com.quantrics.guidomia.model.Car
+import com.quantrics.guidomia.utils.Coroutines
 import org.json.JSONArray
 import java.io.*
 
@@ -22,12 +25,21 @@ class MainActivity : AppCompatActivity() {
     private val carsAdapter = CarsAdapter()
     private var makeFilter: String = ""
     private var modelFilter: String = ""
+    private lateinit var viewModel: MainViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setSupportActionBar(binding.toolbar)
 
-        getJsonCarList()
+        val guidomiaDatabase = GuidomiaDatabase.getInstance()
+        val mainRepository = MainRepository(guidomiaDatabase)
+        val factory = MainViewModelFactory(mainRepository)
+        viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
+
+        Coroutines.inputOutput {
+            getCartListFromDb()
+        }
     }
 
     private fun getJsonCarList() {
@@ -52,9 +64,23 @@ class MainActivity : AppCompatActivity() {
             cars.add(car)
         }
 
-        bindUI()
+        var newList: List<Car> = ArrayList<Car>(cars)
+        viewModel.saveCarsToDatabase(newList)
+    }
 
-        Log.e("TEST", "getJsonCarList: $cars")
+    private suspend fun getCartListFromDb() {
+        Coroutines.main {
+            val cars = viewModel.cars.await()
+            cars.observe(this, {
+                if (it.isEmpty()) {
+                    getJsonCarList()
+                } else {
+                    this.cars.clear()
+                    this.cars.addAll(it)
+                    bindUI()
+                }
+            })
+        }
     }
 
     private fun filter() {

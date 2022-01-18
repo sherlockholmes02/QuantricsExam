@@ -7,7 +7,7 @@
 
         <variable
             name="car"
-            type="com.quantrics.guidomia.model.Car" />
+            type="com.quantrics.guidomia.data.entities.Car" />
 
     </data>
 

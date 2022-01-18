@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.quantrics.guidomia.R
 import com.quantrics.guidomia.databinding.ItemCarBinding
-import com.quantrics.guidomia.model.Car
+import com.quantrics.guidomia.data.entities.Car
 import com.squareup.picasso.Picasso
 
 
