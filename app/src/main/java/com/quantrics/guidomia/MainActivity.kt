@@ -1,6 +1,9 @@
 package com.quantrics.guidomia
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -17,6 +20,8 @@ class MainActivity : AppCompatActivity() {
     private val cars: MutableList<Car> = mutableListOf()
     private lateinit var binding: ActivityMainBinding
     private val carsAdapter = CarsAdapter()
+    private var makeFilter: String = ""
+    private var modelFilter: String = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -52,6 +57,29 @@ class MainActivity : AppCompatActivity() {
         Log.e("TEST", "getJsonCarList: $cars")
     }
 
+    private fun filter() {
+        val filteredCars = ArrayList<Car>()
+        if (!TextUtils.isEmpty(modelFilter) && !TextUtils.isEmpty(makeFilter)) {
+            cars.filterTo(filteredCars) {
+                it.make.lowercase().contains(makeFilter) || it.model.lowercase()
+                    .contains(modelFilter)
+            }
+        } else if (!TextUtils.isEmpty(modelFilter) && TextUtils.isEmpty(makeFilter)) {
+            cars.filterTo(filteredCars) {
+                it.model.lowercase().contains(modelFilter)
+            }
+        } else if (TextUtils.isEmpty(modelFilter) && !TextUtils.isEmpty(makeFilter)) {
+            cars.filterTo(filteredCars) {
+                it.make.lowercase().contains(makeFilter)
+            }
+        } else {
+            carsAdapter.submitList(cars)
+            return
+        }
+        carsAdapter.submitList(filteredCars)
+        carsAdapter.notifyDataSetChanged()
+    }
+
     private fun bindUI() {
         binding.rvCars.apply {
             layoutManager =
@@ -60,5 +88,35 @@ class MainActivity : AppCompatActivity() {
             adapter = carsAdapter
         }
         carsAdapter.submitList(cars)
+
+        setListeners()
+    }
+
+    private fun setListeners() {
+        binding.etMake.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+            }
+
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+            }
+
+            override fun afterTextChanged(editable: Editable) {
+                makeFilter = editable.toString().lowercase()
+                filter()
+            }
+        })
+
+        binding.etModel.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+            }
+
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+            }
+
+            override fun afterTextChanged(editable: Editable) {
+                modelFilter = editable.toString().lowercase()
+                filter()
+            }
+        })
     }
 }
