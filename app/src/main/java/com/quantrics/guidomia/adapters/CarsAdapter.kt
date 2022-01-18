@@ -3,6 +3,7 @@ package com.quantrics.guidomia.adapters
 import android.os.Build
 import android.text.TextUtils
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
@@ -15,6 +16,7 @@ import com.quantrics.guidomia.databinding.ItemCarBinding
 import com.quantrics.guidomia.model.Car
 import com.squareup.picasso.Picasso
 
+
 class CarsAdapter : ListAdapter<Car, CarsAdapter.ViewHolder>(
     object : DiffUtil.ItemCallback<Car>() {
         override fun areItemsTheSame(oldItem: Car, newItem: Car): Boolean =
@@ -24,6 +26,8 @@ class CarsAdapter : ListAdapter<Car, CarsAdapter.ViewHolder>(
             oldItem == newItem
     }
 ) {
+
+    private var openPosition: Int = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
@@ -99,6 +103,25 @@ class CarsAdapter : ListAdapter<Car, CarsAdapter.ViewHolder>(
         }
         item.consList.removeIf { TextUtils.isEmpty(it) }
         consAdapter.submitList(item.consList)
+
+        if (holder.absoluteAdapterPosition == 0) {
+            holder.binding.clCollapsible.visibility = View.VISIBLE
+        }
+
+        holder.itemView.setOnClickListener {
+            openPosition = holder.absoluteAdapterPosition
+            notifyDataSetChanged()
+        }
+
+        setExpandableView(holder)
+    }
+
+    private fun setExpandableView(holder: ViewHolder) {
+        if (openPosition != holder.absoluteAdapterPosition) {
+            holder.binding.clCollapsible.visibility = View.GONE
+        } else {
+            holder.binding.clCollapsible.visibility = View.VISIBLE
+        }
     }
 
     class ViewHolder(val binding: ItemCarBinding) : RecyclerView.ViewHolder(binding.root)
